@@ -1,107 +1,15 @@
 import { players } from './players'
-import { useState, useRef, useCallback } from 'react'
-import {
-  ReactFlow,
-  Controls,
-  Background,
-  applyNodeChanges,
-  applyEdgeChanges,
-} from '@xyflow/react'
+import { useState } from 'react'
 import '@xyflow/react/dist/style.css'
-import { v1 as uuidv1 } from 'uuid'
 import Navigation from './Navigation'
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas'
 import Form from 'react-bootstrap/Form'
-
-const MAX_WIDTH = 500
-const MAX_HEIGHT = 500
-
-const nodeDefaults = {
-  //sourcePosition: Position.Right,
-  //targetPosition: Position.Left,
-  style: {
-    borderRadius: '100%',
-    backgroundColor: '#fff',
-    width: 15,
-    height: 15,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-}
-
-const initialNodes = players.map((player) => {
-  return (
-    {
-      id: player.id,
-      data: {
-        label: player.label,
-        color: player.color,
-        guild: player.guild,
-      },
-      position: {
-        x: player.position.x,
-        y: MAX_HEIGHT - player.position.y
-      },
-      type: 'default',
-      ...nodeDefaults
-    })
-})
-
-
-const calculateDistance = (source, target) => {
-  const sourceNode = initialNodes.find(node => node.id === source)
-  const targetNode = initialNodes.find(node => node.id === target)
-  const sx = sourceNode.position.x
-  console.log('sx', sx)
-  const sy = sourceNode.position.y
-  console.log('sy', sy)
-  const tx = targetNode.position.x
-  console.log('tx', tx)
-  const ty = targetNode.position.y
-  console.log('ty', ty)
-  console.log('111', Math.abs(tx - sx))
-  const distance = Math.sqrt(Math.abs(Math.abs(tx - sx) * Math.abs(tx - sx) - Math.abs(ty - sy) * Math.abs(ty - sy)))
-  console.log('d', distance)
-  return Math.round(distance)
-}
-
-
-console.log('label', calculateDistance('1', '3').toString())
-
-
-const initialEdges = [
-  { id: '1-3', source: '1', target: '3', label: calculateDistance('1', '3').toString(), type: 'straight' },
-  { id: '1-4', source: '1', target: '4', label: calculateDistance('1', '4').toString(), type: 'straight' },
-  { id: '2-3', source: '2', target: '3', label: calculateDistance('2', '3').toString(), type: 'straight' },
-  { id: '2-4', source: '2', target: '4', label: calculateDistance('2', '4').toString(), type: 'straight' },
-]
-
+import Flow from './Flow'
 
 const App = () => {
 
-  const containerRef = useRef(null)
-  const [nodes, setNodes] = useState(initialNodes)
-  const [edges, setEdges] = useState(initialEdges)
-  const [selectedNode, setSelectedNode] = useState(null)
-
   const [show, setShow] = useState(false)
-
-  const onNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    [],
-  );
-  const onEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    [],
-  )
-
-  const onNodeClick = (event, node) => {
-    setShow(true)
-    setSelectedNode(node)
-  }
-
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
 
@@ -163,21 +71,7 @@ const App = () => {
         </Offcanvas.Body>
       </Offcanvas>
       <Navigation players={players} />
-      <div ref={containerRef} className="container my-5">
-        <div style={{ width: '100vw', height: '100vh' }}>
-          <ReactFlow
-            nodes={nodes}
-            onNodesChange={onNodesChange}
-            edges={edges}
-            onEdgesChange={onEdgesChange}
-            onNodeClick={onNodeClick}
-            fitView
-          >
-            <Background />
-            <Controls />
-          </ReactFlow>
-        </div>
-      </div>
+      <Flow />
     </>
   )
 }
